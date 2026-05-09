@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dev's Workout Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #09090f;
+    --surface: #111118;
+    --border: #1e1e2a;
+    --muted: #3a3a4a;
+    --text-dim: #555566;
+  }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(160deg, #09090f 0%, #12121f 100%);
+    padding: 36px 20px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-eyebrow {
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 8vw, 52px);
+    letter-spacing: 3px;
+    line-height: 1;
+    color: #fff;
+  }
+  .header-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-top: 10px;
+  }
+
+  /* WEEK STRIP */
+  .week-strip {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    background: #0d0d14;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .week-strip::-webkit-scrollbar { display: none; }
+  .day-btn {
+    min-width: 70px;
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .day-btn:hover { border-color: var(--muted); }
+  .day-btn.active { }
+  .day-label { font-size: 11px; letter-spacing: 2px; color: var(--text-dim); }
+  .day-name { font-size: 9px; color: var(--text-dim); margin-top: 3px; line-height: 1.3; }
+
+  /* MUSCLE TABS */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 16px 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* EXERCISE SECTION */
+  .section { padding: 20px 16px; }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+  .section-sub { font-size: 10px; color: var(--text-dim); margin-bottom: 20px; letter-spacing: 1px; }
+
+  .exercise-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .ex-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 18px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .ex-card:hover { border-color: var(--muted); }
+  .ex-card.done { }
+
+  .checkbox {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    border: 2px solid var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    transition: all 0.2s;
+    color: #000;
+    font-weight: 700;
+  }
+
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 1.5px;
+    color: #fff;
+    transition: all 0.2s;
+  }
+  .ex-card.done .ex-name { text-decoration: line-through; }
+  .ex-tip { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+  .sets-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #1e1e2a;
+    font-size: 10px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  /* TIPS */
+  .tips {
+    margin: 0 16px;
+    padding: 18px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .tips-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .tip-item { font-size: 11px; color: var(--text-dim); margin-bottom: 7px; line-height: 1.5; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin: 0 16px 20px; }
+  .progress-label { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; letter-spacing: 2px; }
+  .progress-track { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+
+  /* Scroll fade in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ex-card { animation: fadeUp 0.3s ease both; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Personal Fitness System</div>
+  <div class="header-title">Dev's Workout Plan</div>
+  <div class="header-sub">54 KG &nbsp;·&nbsp; Zero Equipment &nbsp;·&nbsp; Home Beast Mode</div>
+</div>
+
+<!-- Week Strip -->
+<div class="week-strip" id="weekStrip"></div>
+
+<!-- Muscle Tabs -->
+<div class="tabs" id="tabs"></div>
+
+<!-- Main Section -->
+<div class="section">
+  <div class="section-title" id="sectionTitle"></div>
+  <div class="section-sub" id="sectionSub"></div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-label" id="progressLabel">0 / 0 DONE</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="exercise-list" id="exerciseList"></div>
+</div>
+
+<!-- Tips -->
+<div class="tips">
+  <div class="tips-title">Pro Tips</div>
+  <div class="tip-item">🥤 Drink water between every set</div>
+  <div class="tip-item">⏱️ Rest 60–90 seconds between sets</div>
+  <div class="tip-item">😴 Sleep 7–8 hrs — that's when you actually grow</div>
+  <div class="tip-item">🍛 Eat enough protein: dal, paneer, eggs, chicken</div>
+  <div class="tip-item">📈 Progressive overload = add reps every week</div>
+</div>
+
+<script>
+const plan = {
+  chest: {
+    emoji: "💪", color: "#FF6B35",
+    exercises: [
+      { name: "Push-Ups", sets: "4 × 15", tip: "Keep core tight, chest to floor" },
+      { name: "Wide Push-Ups", sets: "3 × 12", tip: "Hands wider than shoulders" },
+      { name: "Diamond Push-Ups", sets: "3 × 10", tip: "Hands form a diamond shape" },
+      { name: "Decline Push-Ups", sets: "3 × 10", tip: "Feet elevated on sofa/chair" },
+      { name: "Incline Push-Ups", sets: "3 × 15", tip: "Hands on elevated surface" },
+      { name: "Archer Push-Ups", sets: "3 × 8 each", tip: "Shift weight side to side" },
+    ]
+  },
+  back: {
+    emoji: "🔙", color: "#2EC4B6",
+    exercises: [
+      { name: "Superman Hold", sets: "4 × 30s", tip: "Squeeze glutes and back hard" },
+      { name: "Reverse Snow Angels", sets: "3 × 15", tip: "Lie face down, arms sweep up" },
+      { name: "Table Rows", sets: "4 × 12", tip: "Grip table edge, pull chest up" },
+      { name: "Good Mornings", sets: "3 × 15", tip: "Hinge at hips, feel the hamstring" },
+      { name: "Bird Dog", sets: "3 × 12 each", tip: "Opposite arm + leg extended" },
+      { name: "Back Extensions", sets: "3 × 15", tip: "Lie prone, lift upper body" },
+    ]
+  },
+  shoulders: {
+    emoji: "🦅", color: "#A855F7",
+    exercises: [
+      { name: "Pike Push-Ups", sets: "4 × 12", tip: "Body in inverted V shape" },
+      { name: "Wall Handstand Hold", sets: "3 × 20s", tip: "Build up time gradually" },
+      { name: "Lateral Raises (bottles)", sets: "3 × 15", tip: "Use 1L water bottles" },
+      { name: "Arm Circles", sets: "3 × 30s", tip: "Small then large circles" },
+      { name: "Shoulder Taps", sets: "3 × 20", tip: "From push-up position, tap each shoulder" },
+      { name: "Hindu Push-Ups", sets: "3 × 10", tip: "Dive motion, great for shoulders" },
+    ]
+  },
+  core: {
+    emoji: "🔥", color: "#EF4444",
+    exercises: [
+      { name: "Plank", sets: "4 × 45s", tip: "Hips level, breathe steadily" },
+      { name: "Crunches", sets: "4 × 20", tip: "Don't pull your neck" },
+      { name: "Leg Raises", sets: "3 × 15", tip: "Lower back stays flat" },
+      { name: "Russian Twists", sets: "3 × 20", tip: "Twist slow and controlled" },
+      { name: "Mountain Climbers", sets: "3 × 30s", tip: "Drive knees fast, core tight" },
+      { name: "Hollow Body Hold", sets: "3 × 30s", tip: "Lower back pressed to floor" },
+    ]
+  },
+  legs: {
+    emoji: "🦵", color: "#22C55E",
+    exercises: [
+      { name: "Squats", sets: "4 × 20", tip: "Chest up, knees track toes" },
+      { name: "Lunges", sets: "3 × 15 each", tip: "Step wide, knee above ankle" },
+      { name: "Wall Sit", sets: "3 × 45s", tip: "90 degree angle, no cheating" },
+      { name: "Glute Bridges", sets: "4 × 20", tip: "Squeeze at the top!" },
+      { name: "Jump Squats", sets: "3 × 12", tip: "Explosive up, soft landing" },
+      { name: "Calf Raises", sets: "4 × 25", tip: "Full range, hold at top" },
+    ]
+  }
+};
+
+const week = [
+  { day: "MON", label: "Chest Day", focus: "chest" },
+  { day: "TUE", label: "Back Day", focus: "back" },
+  { day: "WED", label: "Core Day", focus: "core" },
+  { day: "THU", label: "Shoulder Day", focus: "shoulders" },
+  { day: "FRI", label: "Leg Day", focus: "legs" },
+  { day: "SAT", label: "Active Rest", focus: null },
+  { day: "SUN", label: "Full Rest 😴", focus: null },
+];
+
+let active = "chest";
+let checked = {};
+
+function getColor() { return plan[active].color; }
+
+function renderWeek() {
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = week.map(d => {
+    const col = d.focus ? plan[d.focus].color : '#444';
+    const isActive = d.focus === active;
+    return `<button class="day-btn${isActive ? ' active' : ''}" 
+      onclick="${d.focus ? `setActive('${d.focus}')` : ''}"
+      style="border-color:${isActive ? col : ''}; background:${isActive ? col+'18' : ''}; cursor:${d.focus ? 'pointer' : 'default'}">
+      <div class="day-label" style="color:${isActive ? col : ''}">${d.day}</div>
+      <div class="day-name">${d.label}</div>
+    </button>`;
+  }).join('');
+}
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = Object.entries(plan).map(([key, val]) => {
+    const isActive = key === active;
+    return `<button class="tab-btn" onclick="setActive('${key}')"
+      style="border-color:${isActive ? val.color : ''}; background:${isActive ? val.color : ''}; color:${isActive ? '#000' : ''}">
+      ${val.emoji} ${key.toUpperCase()}
+    </button>`;
+  }).join('');
+}
+
+function renderExercises() {
+  const col = getColor();
+  const p = plan[active];
+  document.getElementById('sectionTitle').textContent = `${p.emoji} ${active.toUpperCase()} WORKOUT`;
+  document.getElementById('sectionTitle').style.color = col;
+  document.getElementById('sectionSub').textContent = `${p.exercises.length} EXERCISES · TAP TO MARK DONE`;
+
+  const total = p.exercises.length;
+  const done = p.exercises.filter((_, i) => checked[`${active}-${i}`]).length;
+  document.getElementById('progressLabel').textContent = `${done} / ${total} DONE`;
+  document.getElementById('progressFill').style.width = `${(done/total)*100}%`;
+  document.getElementById('progressFill').style.background = col;
+
+  document.getElementById('exerciseList').innerHTML = p.exercises.map((ex, i) => {
+    const key = `${active}-${i}`;
+    const isDone = checked[key];
+    return `<div class="ex-card${isDone ? ' done' : ''}" onclick="toggle('${key}')"
+      style="border-color:${isDone ? col : ''}; background:${isDone ? col+'12' : ''}; animation-delay:${i*0.05}s">
+      <div class="checkbox" style="border-color:${isDone ? col : ''}; background:${isDone ? col : 'transparent'}">
+        ${isDone ? '✓' : ''}
+      </div>
+      <div class="ex-info">
+        <div class="ex-name" style="color:${isDone ? col : '#fff'}">${ex.name}</div>
+        <div class="ex-tip">${ex.tip}</div>
+      </div>
+      <div class="sets-badge" style="color:${isDone ? '#000' : col}; background:${isDone ? col : ''}">
+        ${ex.sets}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function render() {
+  renderWeek();
+  renderTabs();
+  renderExercises();
+}
+
+function setActive(key) {
+  active = key;
+  render();
+}
+
+function toggle(key) {
+  checked[key] = !checked[key];
+  renderExercises();
+  renderWeek();
+}
+
+render();
+</script>
+</body>
+</html>
